@@ -70,8 +70,10 @@ metadata {
 			}
 			
 			standardTile("reverse", "device.image", width: 1, height: 1, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
-				state "reverse", label: "reverse", action: "reverse", icon: ""
+				state "reverse", label: "Reverse", action: "reverse", icon: ""
 			}
+            
+            main(speed0)
 		}
 	}
 
