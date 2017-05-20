@@ -19,7 +19,8 @@ import groovy.json.JsonBuilder
 metadata {
 	definition (name: "6 Speed DC Fan Control", namespace: "technothingy", author: "Sean Savage") {
 		capability "Actuator"
-//		capability "Switch"
+		capability "Switch"
+        capability "Switch Level"
 		
 		command "speed1"
 		command "speed2"
@@ -40,36 +41,44 @@ metadata {
 				state "off", label: "off", icon: "st.switches.switch.off", backgroundColor: "#ffffff"
 				state "on", label: "on", icon: "st.switches.switch.on", backgroundColor: "#00a0dc"
 			}*/
-			
-			standardTile("speed1", "device.image", width: 1, height: 1, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
+			multiAttributeTile(name:"switch", type: "lighting", width: 6, height: 4, canChangeIcon: true) {
+    			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
+        			attributeState "on", label:'${name}', action:"switch.off", icon:"st.lights.philips.hue-single", backgroundColor:"#00a0dc" 
+       				attributeState "off", label:'${name}', action:"switch.on", icon:"st.lights.philips.hue-single", backgroundColor:"#ffffff"
+    			}
+    			tileAttribute ("device.level", key: "SLIDER_CONTROL") {
+        			attributeState "level", action:"switch level.setLevel"
+    			}
+			}
+			standardTile("speed1", "device.image", width: 2, height: 2, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
 				state "speed1", label: "Speed 1", action: "speed1", icon: ""
 			}
 			
-			standardTile("speed2", "device.image", width: 1, height: 1, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
+			standardTile("speed2", "device.image", width: 2, height: 2, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
 				state "speed2", label: "Speed 2", action: "speed2", icon: ""
 			}
 			
-			standardTile("speed3", "device.image", width: 1, height: 1, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
+			standardTile("speed3", "device.image", width: 2, height: 2, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
 				state "speed3", label: "Speed 3", action: "speed3", icon: ""
 			}
 			
-			standardTile("speed4", "device.image", width: 1, height: 1, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
+			standardTile("speed4", "device.image", width: 2, height: 2, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
 				state "speed4", label: "Speed 4", action: "speed4", icon: ""
 			}
 			
-			standardTile("speed5", "device.image", width: 1, height: 1, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
+			standardTile("speed5", "device.image", width: 2, height: 2, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
 				state "speed5", label: "Speed 5", action: "speed5", icon: ""
 			}
 			
-			standardTile("speed6", "device.image", width: 1, height: 1, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
+			standardTile("speed6", "device.image", width: 2, height: 2, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
 				state "speed6", label: "Speed 6", action: "speed6", icon: ""
 			}
 			
-			standardTile("speed0", "device.image", width: 1, height: 1, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
+			standardTile("speed0", "device.image", width: 2, height: 2, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
 				state "speed0", label: "Off", action: "speed0", icon: ""
 			}
 			
-			standardTile("reverse", "device.image", width: 1, height: 1, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
+			standardTile("reverse", "device.image", width: 2, height: 2, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
 				state "reverse", label: "Reverse", action: "reverse", icon: ""
 			}
             
@@ -85,6 +94,29 @@ metadata {
 	tiles {
 		// TODO: define your main and details tiles here
 	}
+}
+
+def on() {
+    sendEvent(name: "switch", value: "on")
+    sendLevel(5)
+    log.info "Dimmer On"
+}
+
+def off() {
+    sendEvent(name: "switch", value: "off")
+    sendLevel(0)
+    log.info "Dimmer Off"
+}
+
+def setLevel(val){
+    log.info "setLevel $val"
+    
+    if (val < 0) val = 0
+    else if( val > 6) val = 6
+    
+    if(val == 0) off() else {
+ 	sendLevel(val)
+    }
 }
 
 // parse events into attributes
@@ -116,7 +148,7 @@ def sendLevel(level) {
 		)
 	
 		log.debug hubAction
-		hubAction
+		sendHubCommand(hubAction)
 	}
 	catch (Exception e) {
 		log.debug "Hit Exception $e on $hubAction"
